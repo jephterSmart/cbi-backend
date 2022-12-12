@@ -16,7 +16,7 @@ params_to_env () {
                 value=$(echo $params | /usr/bin/jq -r ".[][] | select(.${SELECTOR}==\"$key\") | .Value")
                 key=$(echo "${key##*/}" | /usr/bin/tr ':' '_' | /usr/bin/tr '-' '_' | /usr/bin/tr '[:lower:]' '[:upper:]')
                 echo "$key=$value"
-                echo "$key=$value" >>  /home/ec2-user/ngcc-backend/.env
+                echo "$key=$value" >>  /home/ec2-user/cbi_backend/src/env/production.env
     done
 }
 
@@ -29,29 +29,27 @@ params_to_mysqlenv () {
                 value=$(echo $params | /usr/bin/jq -r ".[][] | select(.${SELECTOR}==\"$key\") | .Value")
                 key=$(echo "${key##*/}" | /usr/bin/tr ':' '_' | /usr/bin/tr '-' '_' | /usr/bin/tr '[:lower:]' '[:upper:]')
                 echo "$key=$value"
-                echo "$key=$value" >>  /home/ec2-user/ngcc-backend/mysql.env
+                echo "$key=$value" >>  /home/ec2-user/cbi_backend/mysql.env
     done
 }
 
-APP_TAGS=$(get_parameter_store_tags "/ngcc-backend/test" "us-east-1")
-MYSQL_TAGS=$(get_parameter_store_tags "/ngcc-backend/mysql" "us-east-1")
+APP_TAGS=$(get_parameter_store_tags "/cbi-backend/test" "us-east-1")
+MYSQL_TAGS=$(get_parameter_store_tags "/cbi-backend/mysql" "us-east-1")
 echo "APP Tags fetched via ssm from /ngcc-backend/test us-east-1"
 
 echo "creating new .env variables..."
-sudo chown  www-data:www-data -R /home/ec2-user/ngcc-backend/*
-sudo chmod -R 777 /home/ec2-user/ngcc-backend/storage/
-echo '' >  /home/ec2-user/ngcc-backend/.env
+# sudo chown  www-data:www-data -R /home/ec2-user/ngcc-backend/*
+# sudo chmod -R 777 /home/ec2-user/ngcc-backend/storage/
+echo '' >  /home/ec2-user/cbi_backend/src/env/production.env
 params_to_env "$APP_TAGS"
-echo '' >  /home/ec2-user/ngcc-backend/mysql.env
+echo '' > /home/ec2-user/cbi_backend/mysql.env
 params_to_mysqlenv "$MYSQL_TAGS"
-cd  /home/ec2-user/ngcc-backend
+cd  /home/ec2-user/cbi_backend/
 docker-compose -f docker-compose.yml down
-docker-compose -f docker-compose.yml rm -sf composerutil
-docker-compose -f docker-compose.yml rm -sf artisanutil
+
 docker image prune -f
-docker-compose -f docker-compose.yml run --rm composerutil install
-docker-compose -f docker-compose.yml up -d --build ngccserver
-docker-compose -f docker-compose.yml run --rm artisanutil config:clear
-docker-compose -f docker-compose.yml run --rm artisanutil storage:link
+
+docker-compose -f docker-compose.yml up -d --build
+
 sleep 35s
-docker-compose -f docker-compose.yml run --rm artisanutil migrate --force
+docker exec -it -w /usr/app cbiapi npm run typeorm:prod:run-migrations

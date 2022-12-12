@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  cbiapi:
+    container_name: cbiapi
+    build:
+      context: ./
+      dockerfile: docker/node.dockerfile
+    depends_on:
+      - mysqlserver
+
+  cbiserver:
+    build: 
+      context: ./
+      dockerfile: docker/nginx.dockerfile
+   
+    ports:
+      - "80:80"
+    depends_on:
+      - mysqlserver
+      - cbiapi
+
+  mysqlserver:
+    platform: linux/amd64
+    image: mysql:5.7
+    env_file:
+      - ./mysql.env
+    volumes:
+      - dbdata:/var/lib/mysql/
+
+volumes:
+  dbdata:
+    driver: local
