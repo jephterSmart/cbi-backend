@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ec2-user/ngcc-backend
+    destination: /home/ec2-user/cbi_backend
 file_exists_behavior: OVERWRITE
 hooks:
   AfterInstall:
