@@ -52,4 +52,4 @@ docker image prune -f
 docker-compose up -d --build cbiserver
 
 sleep 35s
-docker exec -it -w /usr/app cbiapi npm run typeorm:prod:run-migrations
+docker exec -i -w /usr/app cbiapi npm run typeorm:prod:run-migrations
