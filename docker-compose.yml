@@ -11,7 +11,7 @@ services:
   cbiserver:
     build: 
       context: ./
-      dockerfile: docker/nginx.dockerfile
+      dockerfile: nginx.dockerfile
    
     ports:
       - "80:80"
