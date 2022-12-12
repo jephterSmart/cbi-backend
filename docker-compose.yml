@@ -3,8 +3,8 @@ services:
   cbiapi:
     container_name: cbiapi
     build:
-      context: ../
-      dockerfile: cbi_backend/docker/node.dockerfile
+      context: ./
+      dockerfile: docker/node.dockerfile
     depends_on:
       - mysqlserver
 
