@@ -49,7 +49,7 @@ docker-compose -f docker-compose.yml down
 
 docker image prune -f
 
-docker-compose -f docker-compose.yml up -d --build
+docker-compose up -d --build
 
 sleep 35s
 docker exec -it -w /usr/app cbiapi npm run typeorm:prod:run-migrations
